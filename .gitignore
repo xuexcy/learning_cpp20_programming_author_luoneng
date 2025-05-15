@@ -1,0 +1,9 @@
+.cache/
+.vscode/
+.DS_Store
+.clang-format
+
+# for build
+build/
+build_g++/
+thirdparty/
