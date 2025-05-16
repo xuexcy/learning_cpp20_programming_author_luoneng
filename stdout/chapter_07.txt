@@ -1,0 +1,100 @@
+void run_range_demo()
+before
+transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+transform transform filter transform filter transform  take_while
+[1, 9, 25, 49, 81, 121, 169, 225, 289, 361, 441, 529, 625, 729, 841, 961, 1089, 1225, 1369, 1521, 1681, 1849, 2025, 2209, 2401, 2601, 2809, 3025, 3249, 3481, 3721, 3969, 4225, 4489, 4761, 5041, 5329, 5625, 5929, 6241, 6561, 6889, 7225, 7569, 7921, 8281, 8649, 9025, 9409, 9801]
+after
+
+void run_foo()
+call std::swap
+using std::swap, call ns::swap
+void ns::swap(Foo &, Foo &)
+custom swap
+std::ranges::swap, call ns::swap
+void ns::swap(Foo &, Foo &)
+custom swap
+my_ranges::swap, call ns::swap
+void my_ranges::_swap::Swap::operator()(T &&, U &&) const [T = ns::Foo &, U = ns::Foo &]
+void ns::swap(Foo &, Foo &)
+custom swap
+
+void run_borrowed_range()
+
+void run_iota_view()
+0 1 2 3 4 
+0 1 2 3 4 
+
+void run_take()
+0 1 2 3 4 
+
+void run_take_while()
+0 1 2 
+
+void run_drop()
+5 6 7 8 9 
+
+void run_drop_while()
+hello there
+
+void run_join()
+hello world!
+
+void run_split()
+the* quick* brown* fox* 
+
+void run_reverse()
+2 1 0 
+
+void run_elements()
+Babbage Hamilton Lovelace Turing 
+1791 1936 1815 1912 
+

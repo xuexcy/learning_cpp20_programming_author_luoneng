@@ -485,10 +485,8 @@ void run_elements() {
   std::println();
   // 标准库定义了 keys 和 values 来代表 elements<0> 和 element<1>
   // 因为这两个比较常见
-  static_assert(std::is_same_v<decltype(std::views::keys), decltype(std::views::elements<0>)>);
-  static_assert(std::is_same_v<decltype(std::views::value), decltype(std::views::elements<1>)>);
-
-  std::println();
+  SAME_TYPE(decltype(std::views::keys), decltype(std::views::elements<0>));
+  SAME_TYPE(decltype(std::views::values), decltype(std::views::elements<1>));  std::println();
 }
 
 // 7.6 其他改善

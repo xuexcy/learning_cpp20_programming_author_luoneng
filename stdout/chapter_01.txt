@@ -1,0 +1,81 @@
+void run_span()
+abc
+abc
+hijk
+hijk
+12
+12345
+22345
+3 3 3 3 3
+123
+
+void run_not_null()
+32
+
+void run_make_unique()
+std::unique_ptr<T> make_unique(Arg &) [T = B, Arg = int]
+B::B(int &)
+std::unique_ptr<T> make_unique(Arg &&) [T = B, Arg = int]
+B::B(int &)
+------------
+std::unique_ptr<T> make_unique_with_forward(Arg &&) [T = A, Arg = int]
+T &&forward(std::remove_reference_t<T> &) [T = int]
+hi
+A::A(int &&)
+std::unique_ptr<T> make_unique_with_forward(Arg &&) [T = A, Arg = int]
+T &&forward(std::remove_reference_t<T> &) [T = int]
+hi
+A::A(int &&)
+std::unique_ptr<T> make_unique_with_forward(Arg &&) [T = A, Arg = int]
+T &&forward(std::remove_reference_t<T> &) [T = int]
+hi
+A::A(int &&)
+std::unique_ptr<T> make_unique_with_forward(Arg &&) [T = B, Arg = int &]
+T &&forward(std::remove_reference_t<T> &) [T = int &]
+hi
+B::B(int &)
+std::unique_ptr<T> make_unique_with_forward(Arg &&) [T = B, Arg = int]
+T &&forward(std::remove_reference_t<T> &) [T = int]
+hi
+B::B(int &&)
+------------
+std::unique_ptr<T> make_unique_with_forward2(Arg &&) [T = A, Arg = int]
+T &&forward2(T &) [T = int]
+A::A(int &&)
+std::unique_ptr<T> make_unique_with_forward(Arg &&) [T = A, Arg = int]
+T &&forward(std::remove_reference_t<T> &) [T = int]
+hi
+A::A(int &&)
+std::unique_ptr<T> make_unique_with_forward2(Arg &&) [T = B, Arg = int &]
+T &&forward2(T &) [T = int &]
+B::B(int &)
+std::unique_ptr<T> make_unique_with_forward2(Arg &&) [T = B, Arg = int]
+T &&forward2(T &) [T = int]
+B::B(int &&)
+------------
+
+void run_make_unique_with_get()
+B::B(int &&)
+T &&forward(std::remove_reference_t<T> &) [T = B &]
+hi
+T &&forward(std::remove_reference_t<T> &) [T = int &]
+hi
+B::B(int &&)
+T &&forward(std::remove_reference_t<T> &) [T = B]
+hi
+T &&forward(std::remove_reference_t<T> &&) [T = int]
+------------
+void run_auto()
+
+void run_decltype()
+
+void run_decltype_auto()
+
+void run_declval()
+
+void run_function_object()
+1 + 5 = 6
+1 + 5 = 6
+5, 5, 6, 7, 
+void run_lambda()
+
