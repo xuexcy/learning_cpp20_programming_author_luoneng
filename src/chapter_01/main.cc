@@ -15,10 +15,13 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <print>
 #include <span>
 #include <type_traits>
 #include <vector>
+
+#include "shape.h"
 
 #include <gsl/gsl>
 #include "cpp_utils/util.h"
@@ -784,6 +787,57 @@ std::function<int(int, int)> OperationFactory(Op op) {
 }
 // 上面的函数适配器可以动态绑定两种不同的函数对象
 
+// 1.6 运行时多态
+
+
+void run_polymorphism() {
+  PRINT_CURRENT_FUNCTION_NAME;
+  {  // 继承多态
+    using namespace subtype;
+    std::unique_ptr<Shape> shape = std::make_unique<Circle>(2);
+    std::println("shape area: {}, perimeter: {}", shape->get_area(), shape->get_perimeter());
+
+    shape = std::make_unique<Rectangle>(2, 3);
+    std::println("shape area: {}, perimeter: {}", shape->get_area(), shape->get_perimeter());
+  }
+  {
+    using namespace ad_hoc;
+    Shape shape = Circle(2);
+    std::println("shape area: {}", get_area(shape));
+    shape = Rectangle(1, 2);
+    std::println("shape area: {}", get_area(shape));
+  }
+  std::println();
+}
+
+// 1.6.2 subtype 多态 vs ad-hoc(特殊类型) 多态
+// 见 ./shape.h
+
+// 1.7 调试手段
+/*
+C++ 标准无法直接得知当前类型名，可以通过一个 dump 模板类，利用编译报错将类型信息打印出来
+*/
+template <typename> struct dump;
+int aa = 1;
+using T1 = decltype(aa);
+// dump<T1> t1{};  // 由于 dump 只有声明，没有定义当我们构造一个实例时，编译器就会报错
+// 可以将 dump 改成变参模板类，这样就可以一下打印多个类
+template <typename, typename...> struct dump2;
+
+// 编译错误打印过多，就会停止编译，导致后面的打印语句无效
+// dump2<T1, T2, T3> {};
+// dump2<T4, T5, T6> {};
+// dump2<T7> {};  // 可能由于前面的错误太多导致没有编译到这行就停止了
+
+// 使用 deprecated 来解决上面的问题
+// deprecated 属性表明被修饰的尸体已被弃用, 继续使用可以编译成功，但会引用编译告警
+// 我们可以利用这个告警来实现调试功能
+template <typename, typename...>
+struct [[deprecated]] dump3{};
+// dump3<int> ttta{};
+
+// 1.7.2 运行时打印方案
+
 int main() {
   run_span();
   run_not_null();
@@ -799,5 +853,6 @@ int main() {
   run_ctad();
   run_function_object();
   run_lambda();
+  run_polymorphism();
   return 0;
 }

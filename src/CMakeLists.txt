@@ -12,5 +12,9 @@ set(main_name chapter_01)
 add_executable(${main_name} ${main_name}/main.cc)
 target_link_libraries(${main_name} Microsoft.GSL::GSL)
 
+set(main_name chapter_01_benchmark_shape)
+add_executable(${main_name} chapter_01/benchmark_shape.cc)
+target_link_libraries(${main_name} benchmark::benchmark )
+
 set(main_name chapter_07)
 add_executable(${main_name} ${main_name}/main.cc)

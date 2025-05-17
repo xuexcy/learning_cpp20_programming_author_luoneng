@@ -25,7 +25,7 @@ if [ $# -gt 0 ]; then
 fi
 
 cd $build_dir
-make $main
+make -j$(getconf _NPROCESSORS_ONLN) $main
 
 
 

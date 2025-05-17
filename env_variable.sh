@@ -10,7 +10,7 @@ echo "Project root dir:" $this_script_dir
 echo ''
 
 export compiler=clang++
-# export compiler=g++
+#export compiler=g++
 export default_execute_file=chapter_01
 
 # cmake 工作目录

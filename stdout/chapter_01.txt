@@ -79,3 +79,9 @@ void run_function_object()
 5, 5, 6, 7, 
 void run_lambda()
 
+void run_polymorphism()
+shape area: 12.566370614359172, perimeter: 12.566370614359172
+shape area: 6, perimeter: 10
+shape area: 12.566370614359172
+shape area: 6.283185307179586
+

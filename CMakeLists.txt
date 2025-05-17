@@ -28,6 +28,28 @@ FetchContent_MakeAvailable(cpp_utils)
 include_directories(${THIRDPARTY_DIR}/cpp_utils)
 set(EXTRA_LIBS ${EXTRA_LIBS} cpp_utils)
 
+
+# import google test
+FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG main
+    GIT_SHALLOW TRUE
+    SOURCE_DIR ${THIRDPARTY_DIR}/googletest
+)
+FetchContent_MakeAvailable(googletest)
+
+# import google benchmark
+FetchContent_Declare(
+    google_benchmark
+    GIT_REPOSITORY https://github.com/google/benchmark.git
+    GIT_TAG main
+    GIT_SHALLOW TRUE
+    SOURCE_DIR ${THIRDPARTY_DIR}/google_benchmark
+)
+FetchContent_MakeAvailable(google_benchmark)
+
+# import microsoft GSL
 FetchContent_Declare(GSL
     GIT_REPOSITORY "https://github.com/microsoft/GSL"
     GIT_TAG "v4.2.0"
