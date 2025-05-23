@@ -10,6 +10,6 @@
 - `run_one.sh`: 执行一个编译结果，同 `build_one.sh` 一样，具体哪个取决于 `env_variable.sh` 中的 `default_execute_file`
 - `src/*.cc`: 各个 main 文件
 ## 目录
-1. 类型与对象 (TODO 1.4.2)
-2.
+1. 类型与对象
+2. 编译时多态
 7. Ranges 标准库 (TODO 7.6)

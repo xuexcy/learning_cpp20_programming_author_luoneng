@@ -32,6 +32,8 @@ do
     echo 'end ' $file
 done
 
+sh src/chapter_02/dump_layout.sh > $stdout_dir/chapter_02_dump_layout.txt
+
 cd -
 
 
