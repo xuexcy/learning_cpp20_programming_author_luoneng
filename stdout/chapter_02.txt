@@ -1,0 +1,40 @@
+void run_feed()
+void animal::feed(Cat *, int)
+
+void run_span()
+container size: 5
+container size: 2
+container size: 3
+
+void run_advance()
+void advance_impl(InputIter &, typename std::iterator_traits<InputIter>::difference_type, std::input_iterator_tag) [InputIter = std::__forward_list_iterator<std::__forward_list_node<int, void *> *>]
+forward_list[2] : 3
+void advance_impl(InputIter &, typename std::iterator_traits<InputIter>::difference_type, std::input_iterator_tag) [InputIter = std::__forward_list_iterator<std::__forward_list_node<int, void *> *>]
+forward_list[0] : 3
+void advance_impl(BidirectionalIter &, typename std::iterator_traits<BidirectionalIter>::difference_type, std::bidirectional_iterator_tag) [BidirectionalIter = std::__list_iterator<int, void *>]
+list[2] : 3
+void advance_impl(BidirectionalIter &, typename std::iterator_traits<BidirectionalIter>::difference_type, std::bidirectional_iterator_tag) [BidirectionalIter = std::__list_iterator<int, void *>]
+list[0] : 1
+void advance_impl(RandomIter &, typename std::iterator_traits<RandomIter>::difference_type, std::random_access_iterator_tag) [RandomIter = std::__wrap_iter<int *>]
+vector[2] : 3
+void advance_impl(RandomIter &, typename std::iterator_traits<RandomIter>::difference_type, std::random_access_iterator_tag) [RandomIter = std::__wrap_iter<int *>]
+vector[0] : 1
+
+void run_crtp()
+void play(Animal<T> &) [T = Cat]
+let's go to play
+void Cat::bark_impl()
+Miaowing!
+let's go home
+void play(Animal<T> &) [T = Dog]
+let's go to play
+void Dog::bark_impl()
+Wang Wang!
+let's go home
+
+void run_expression_template()
+17
+1 + 3 * 4 = 13
+2 + 2 * 4 = 10
+3 + 1 * 4 = 7
+

@@ -15,11 +15,13 @@ CUR_DIR=$(cd `dirname $0`; pwd)
 cd ${CUR_DIR}
 source ./env_variable.sh
 
-cd $build_output_bin_dir
-
 stdout_dir=${CUR_DIR}/stdout
 echo 'stdout_dir:' $stdout_dir
 mkdir -p $stdout_dir
+
+sh src/chapter_02/dump_layout.sh > $stdout_dir/chapter_02_dump_layout.txt
+
+cd $build_output_bin_dir
 for file in *
 do
     output=$stdout_dir/$file.txt
@@ -32,7 +34,6 @@ do
     echo 'end ' $file
 done
 
-sh src/chapter_02/dump_layout.sh > $stdout_dir/chapter_02_dump_layout.txt
 
 cd -
 

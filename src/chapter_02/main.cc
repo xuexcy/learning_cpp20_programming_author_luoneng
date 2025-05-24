@@ -11,7 +11,9 @@
 ########################################################################
 */
 
+#include <concepts>
 #include <forward_list>
+#include <cassert>
 #include <iterator>
 #include <limits>
 #include <list>
@@ -424,11 +426,178 @@ struct Derived : Base<Derived> {
 */
 
 // 2.3.1 代码复用
+class VideoFile;
+class TextFile;
+struct Visitor {
+  virtual void visit(VideoFile&) = 0;
+  virtual void visit(TextFile&) = 0;
+  virtual ~Visitor() = default;
+};  // struct Visitor
+struct Elem {
+  virtual void accept(Visitor& visit) = 0;
+  virtual ~Elem();
+};  // struct Elem
+struct VideoFile : Elem {
+  void accept(Visitor& visit) override {
+    visit.visit(*this);
+  }
+};  // struct VideoFile
+struct TextFile: Elem {
+  void accept(Visitor& visit) override {
+    visit.visit(*this);
+  }
+};  // struct TextFile
+/*
+一个 Visitor 可以对 VideoFile 和 TextFile 进行访问
+一个 Elem 使用 accept 接受一个 Visitor 让它访问自己
+每个继承了 Elem 并实现的 accept 都是一样的，但是没办法在 Elem 中统一实现，因为 this 在基类中没有多态性
+每个继承类的差别就在于 this 的类型
+*/
+template <typename Derived>
+struct AutoDispatchElem : Elem {
+  void accept(Visitor& visitor) override {
+    visitor.visit(static_cast<Derived&>(*this));
+  }
+};  // struct AutoDispatchElem
+/*
+继承关系 Elem -> AutoDispatchElem -> VideoFile2
+解决问题的关键在于，AutoDispatchElem 可以通过模板参数 Derived 知道谁继承了它
+这样 AutoDispatchElem 就可以在 accept 的定义中将 *this 转换成 Derived&
+*/
+struct VideoFile2 : AutoDispatchElem<VideoFile2> {
+};  // struct VideoFile2
+struct TextFile2 : AutoDispatchElem<TextFile2>{
+};  // struct TextFile2
 
+template <typename Derived>
+struct Comparable {
+  friend bool operator==(const Derived& lhs, const Derived& rhs) {
+    return lhs.tie() == rhs.tie();
+  }
+  friend bool operator<(const Derived& lhs, const Derived& rhs) {
+    return lhs.tie() < rhs.tie();
+  }
+};  // struct Compareable
+struct Point : Comparable<Point> {
+  int x;
+  int y;
+  Point(int x, int y) : x(x), y(y) {}
+  auto tie() const { return std::tie(x, y); }
+};  // struct Point
+
+// cpp20 三路比较操作符 three-way comparison operator
+struct Point2 {
+  int x;
+  int y;
+  friend auto operator<=>(const Point2& lhs, const Point2& rhs) = default;
+};  // struct Point2
+
+// 2.3.2 静态多态
+template <typename Derived>
+struct Animal {
+  void bark() { static_cast<Derived&>(*this).bark_impl(); }
+};  // struct Animal
+class Cat : public Animal<Cat> {
+  friend Animal;  // class Cat 的 bark_impl 为 private, 但对 Animal 可见
+  void bark_impl() {
+    PRINT_CURRENT_FUNCTION_NAME;
+    std::println("Miaowing!");
+  }
+};  // struct Cat
+class Dog : public Animal<Dog> {
+  friend Animal;  // class Dog 的 bark_impl 为 private, 但对 Animal 可见
+  void bark_impl() {
+    PRINT_CURRENT_FUNCTION_NAME;
+    std::println("Wang Wang!");
+  }
+};  // struct Dog
+
+template <typename T>
+void play(Animal<T>& animal) {
+  PRINT_CURRENT_FUNCTION_NAME;
+  std::println("let's go to play");
+  animal.bark();
+  std::println("let's go home");
+}
+void run_crtp() {
+  PRINT_CURRENT_FUNCTION_NAME;
+  Cat c;
+  Dog d;
+  play(c);
+  play(d);
+  std::println();
+}
+
+// 2.3.3 enable_shared_from_this 模板类
+
+// 2.4 表达式模板
+// https://github.com/xuexcy/learning_more_cpp_idioms/tree/main/src/expression_template_deps
+
+// 2.4.1 标量延迟计算
+template <typename T, typename U, typename Op>
+struct BinaryExpression {
+  BinaryExpression(const T& lhs, const U& rhs, Op op): lhs(lhs), rhs(rhs), op(op) {}
+  auto operator()() const {
+    return op(lhs, rhs);
+  }
+protected:
+  T lhs;
+  U rhs;
+  Op op;
+};  // struct BinaryExpression
+// 2.4.2 向量延迟计算
+template <typename T, typename U, typename Op>
+struct BinaryContainerExpression : private BinaryExpression<T, U, Op> {
+  using Base = BinaryExpression<T, U, Op>;
+  using Base::Base;
+  auto operator[](std::size_t index) const {
+    assert(index < size());
+    return Base::op(Base::lhs[index], Base::rhs[index]);
+  }
+  std::size_t size() const {
+    // 这个 assert 最好在构造函数中调用, 并在构造函数中记录 size, 避免每次都调用 lhs.size()
+    assert(Base::lhs.size() == Base::rhs.size());
+    return Base::lhs.size();
+  }
+};  // struct BinaryContainerExpression
+
+// 类模板参数推导规则, 通过构造时的参数类型推导类模板参数类型
+// 继承关系的存在使得编译器无法自动获取这个规则，所以要主动写这个推导规则
+template <typename T, typename U, typename Op>
+BinaryContainerExpression(T, U, Op) -> BinaryContainerExpression<T, U, Op>;
+
+void run_expression_template() {
+  PRINT_CURRENT_FUNCTION_NAME;
+  {
+    auto plus = [](auto x, auto y) { return x + y; };
+    BinaryExpression expr(5, 3.5, plus);
+    // 此时只记录了表达式，并没有计算，只有调用 expr 的 operator() 才会进行计算
+    std::println("{}", expr() * 2.0);  // (5 + + 3.5) * 2  =17
+  }
+  {
+    std::vector<int> x{1, 2, 3};
+    std::vector<int> y{3, 2, 1};
+    int alpha = 4;
+    auto add_scaled = [alpha](auto lhs, auto rhs) {
+      return lhs + alpha * rhs;
+    };
+    auto expr = BinaryContainerExpression(x, y, add_scaled);
+    for (std::size_t i = 0; i < expr.size(); ++i) {
+      std::println("{} + {} * {} = {}", x[i], y[i], alpha, expr[i]);
+    }
+  }
+
+  std::println();
+}
+
+// 2.4.3 提高表达力
+// 重载 operator: 参见https://github.com/xuexcy/learning_more_cpp_idioms/tree/main/src/expression_template_deps
 int main() {
   run_feed();
   run_span();
   run_advance();
+  run_crtp();
+  run_expression_template();
   return 0;
 }
 

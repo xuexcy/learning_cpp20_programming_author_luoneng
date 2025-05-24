@@ -1,0 +1,27 @@
+
+*** Dumping AST Record Layout
+         0 | struct Base (empty)
+           | [sizeof=1, dsize=1, align=1,
+           |  nvsize=1, nvalign=1]
+
+*** Dumping AST Record Layout
+         0 | struct Children
+         0 |   struct Base base (empty)
+         4 |   int other
+           | [sizeof=8, dsize=8, align=4,
+           |  nvsize=8, nvalign=4]
+
+*** Dumping AST Record Layout
+         0 | struct Children2
+         0 |   struct Base (base) (empty)
+         0 |   int other
+           | [sizeof=4, dsize=4, align=4,
+           |  nvsize=4, nvalign=4]
+
+*** Dumping AST Record Layout
+         0 | struct Children3
+         0 |   struct Base base (empty)
+         0 |   int other
+           | [sizeof=4, dsize=4, align=4,
+           |  nvsize=4, nvalign=4]
+/Users/xuechengyun/code/cpp/learning_cpp20_programming_author_luoneng
