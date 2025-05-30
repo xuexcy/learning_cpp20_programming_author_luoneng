@@ -11,7 +11,8 @@
 ########################################################################
 */
 
-#include "cpp_utils/util.h"
+#include <algorithm>
+#include <chrono>
 #include <concepts>
 #include <iostream>
 #include <iterator>
@@ -23,6 +24,10 @@
 #include <type_traits>
 #include <vector>
 
+#include "concat.h"
+#include "chunk.h"
+
+#include "cpp_utils/util.h"
 /*
 range 是对一系列数据的抽象
 1. 只要有头有尾（对于无穷列表，尾部也是无穷的）, 既可以是有界容器，也可以是无界列表
@@ -491,6 +496,387 @@ void run_elements() {
 
 // 7.6 其他改善
 // 7.6.1 迭代器概念
+template <std::ranges::range V>
+using iter_category = typename std::ranges::iterator_t<V>::iterator_category;
+template <std::ranges::range V>
+using iter_concept = typename std::ranges::iterator_t<V>::iterator_concept;
+
+void run_iterator() {
+  std::vector<int> vec;
+  // 函数获取临时对象，【就是】输入迭代器
+  auto doubled = std::ranges::transform_view(vec, [](auto n) { return n * 2; });
+  SAME_TYPE(std::input_iterator_tag, iter_category<decltype(doubled)>);
+  // transform_view 和它的输入 vector, 至少为随机访问迭代器
+  SAME_TYPE(std::random_access_iterator_tag, iter_concept<decltype(doubled)>);
+  SAME_TYPE(std::random_access_iterator_tag, iter_category<decltype(vec)>);
+  SAME_TYPE(std::contiguous_iterator_tag, iter_concept<decltype(vec)>);
+
+  // 函数获取原有元素的引入，【至少是】前向迭代器
+  auto even = std::ranges::filter_view(vec, [](auto n) { return n % 2 == 0; });
+  SAME_TYPE(std::bidirectional_iterator_tag, iter_category<decltype(even)>);
+
+  // range 的一系列组合运算得到的迭代器种类，不高于它的输入，知道最终为前向迭代器
+}
+
+// 7.6.2 算法接口改善
+struct Employee {
+  unsigned id;
+  std::string name;
+  uint8_t age;
+};  // struct Employee
+struct Point {
+  int x, y;
+  double get_length() const {
+    return std::sqrt(x * x + y * y);
+  }
+};  // struct Point
+void run_projection() {
+  std::vector<Employee> vec;
+  // 成员投影
+  std::ranges::sort(vec, std::ranges::less(), &Employee::id);
+  // 标准库写法
+  std::sort(vec.begin(), vec.end(), [](const auto& lhs, const auto& rhs) {
+    return lhs.id < rhs.id;
+  });
+  // 函数投影
+  std::vector<Point> points;
+  auto it = std::ranges::find(points, 5, &Point::get_length);
+  auto it2 = std::find_if(points.begin(), points.end(), [](const auto& point) {
+    return point.get_length() == 5;
+  });
+}
+
+// 7.7 综合运用
+// 7.7.1 矩阵乘法
+void print_range(std::ranges::viewable_range auto&& range, bool need_delim = false,
+    std::size_t depth = 0) {
+  std::print("[");
+  bool first_token = false;
+  for (auto&& v : range) {
+    if (first_token && need_delim) { std::print(", "); }
+    if constexpr (requires{ print_range(v); }) {
+      if (first_token) {
+        std::println();
+        for (auto d = 0; d < depth + 1; ++ d) {
+          std::print(" ");
+        }
+      }
+      print_range(v, need_delim, depth + 1);
+    } else {
+      std::print("{}", v);
+    }
+    first_token = true;
+  }
+  std::print("]");
+}
+template <std::ranges::input_range Rng>
+requires std::ranges::view<Rng>
+struct stride_view : std::ranges::view_interface<stride_view<Rng>> {
+  stride_view() = default;
+  stride_view(Rng rng, std::size_t stride) : rng(std::move(rng)), stride(stride) {}
+  struct stride_iterator {
+    using difference_type = std::ptrdiff_t;
+    using value_type = std::ranges::range_value_t<Rng>;
+    stride_iterator& operator++() {
+      std::ranges::advance(cur, stride, last);  // 每次自增 cur 向前移动 stride 步
+      return *this;
+    }
+    decltype(auto) operator*() const { return *cur; }
+    bool operator==(std::default_sentinel_t) const {
+      return cur == last;
+    }
+    stride_iterator operator++(int) {
+      stride_iterator tmp(*this);
+      ++(*this);
+      return tmp;
+    }
+    bool operator==(const stride_iterator&) const = default; // cpp20
+
+    std::ranges::iterator_t<Rng> cur{};
+    std::size_t stride{};
+    std::ranges::sentinel_t<Rng> last{};
+  };  // struct stride_iterator
+
+  stride_iterator begin() {
+    return {std::ranges::begin(rng), stride, std::ranges::end(rng)};
+  }
+  std::default_sentinel_t end() { return {}; }
+
+  Rng rng;
+  std::size_t stride;
+};  // struct stride_view
+using view_archetype = std::ranges::empty_view<int>;
+static_assert(std::ranges::forward_range<stride_view<view_archetype>>);
+
+struct stride_adapter : std::ranges::range_adaptor_closure<stride_adapter> {
+  std::size_t stride;
+  template <std::ranges::viewable_range Rng>
+  constexpr auto operator()(Rng&& r) const {
+      return stride_view{std::forward<Rng>(r), stride};
+  }
+};  // struct stride_adapter
+inline auto stride(std::size_t stride ) {
+  return stride_adapter{.stride = stride };
+}
+
+struct transpose_adapter : std::ranges::range_adaptor_closure<transpose_adapter> {
+  template <std::ranges::viewable_range Rng>
+  constexpr auto operator()(Rng&& r) const {
+    auto flat = r | std::views::join;
+    auto height = std::ranges::distance(r);
+    auto width = std::ranges::distance(flat) / height;
+    // inner 获取第 col_idx 列
+    auto inner = [=](auto col_idx) mutable {
+      return flat | std::views::drop(col_idx) | stride(width);
+    };
+    return std::views::iota(0, width) | std::views::transform(inner);
+  }
+};  // struct transpose_adapter
+inline constexpr transpose_adapter transpose;
+
+void run_print_range() {
+  PRINT_CURRENT_FUNCTION_NAME;
+  std::vector<std::vector<int>> x {
+    {3, 1, 1, 4},
+    {5, -3, 2, 1},
+    {6, 2, -9, 5},
+  };
+  std::println("matrix:");
+  print_range(x, true);
+  std::println();
+
+  std::println("matrix transpose");
+  print_range(x | transpose, true);
+  std::println();
+
+  {
+    // 所有元素
+    print_range(x | std::views::join, true);  // 转成一行
+    std::println();
+    // 第一列
+    print_range( stride_view{x | std::views::join, 4}, true);
+    std::println();
+    // 第二列
+    print_range( stride_view{x | std::views::join | std::views::drop(1), 4}, true);
+    std::println();
+  }
+  {
+    // 所有元素
+    print_range(x | std::views::join, true);  // 转成一行
+    std::println();
+    // 第一列
+    print_range( x | std::views::join | stride(4), true);
+    std::println();
+    // 第二列
+    print_range( x | std::views::join | std::views::drop(1) | stride(4), true);
+    std::println();
+  }
+  std::println();
+}
+
+// 7.7.2 日历程序
+namespace chrono = std::chrono;
+struct Date {
+  using difference_type = std::ptrdiff_t;
+  Date() = default;
+  Date(uint16_t year, uint16_t month, uint16_t day):
+      days_{chrono::year(year) / chrono::month(month) / chrono::day(day)} {
+  }
+  bool operator==(const Date&) const = default;
+  Date& operator++() {
+    days_ += chrono::days{1};
+    return *this;
+  }
+  Date operator++(int) {
+    auto tmp(*this);
+    ++(*this);
+    return tmp;
+  }
+  uint16_t day() const {
+    return static_cast<unsigned>(chrono::year_month_day(days_).day());
+  }
+  uint16_t month() const {  // [1, 12]
+    return static_cast<unsigned>(chrono::year_month_day(days_).month());
+  }
+  std::string month_name() const {
+    static const std::string months[] = {
+      "January", "February", "March", "April",
+      "May", "June", "July", "August",
+      "September", "October", "November", "December"
+    };
+    return months[month() - 1];
+  }
+  uint16_t year() const {
+    return static_cast<int>(chrono::year_month_day(days_).year());
+  }
+  uint16_t day_of_week() const {
+    return std::chrono::weekday(days_).c_encoding();
+  }
+  bool week_day_less_than(const Date& rhs) const {
+    return day_of_week() < rhs.day_of_week();
+  }
+  friend std::ostream& operator<<(std::ostream& out, const Date& d) {
+    out << d.year() << "-" << d.month() << "-" << d.day();
+    return out;
+  }
+private:
+  chrono::sys_days days_;
+};  // struct Date
+static_assert(std::weakly_incrementable<Date>);
+
+template <>
+// must in namespace std
+struct std::formatter<Date> : std::formatter<std::string> {
+  auto format(const Date& d, format_context& ctx) const {
+    return formatter<string>::format(
+      std::format("{}-{}-{}", d.year(), d.month(), d.day()), ctx);
+  }
+};
+
+// [start, stop)
+auto dates_between(uint16_t start, uint16_t stop) {
+  return std::views::iota(Date{start, 1, 1}, Date{stop, 1, 1});
+}
+
+template <std::ranges::input_range Rng, typename Pred>
+requires std::ranges::view<Rng>
+struct GroupByView : std::ranges::view_interface<GroupByView<Rng, Pred>> {
+  GroupByView() = default;
+  GroupByView(Rng r, Pred p) : r(std::move(r)), p(std::move(p)) {}
+  struct GroupIterator{
+    using difference_type = std::ptrdiff_t;
+    using value_type = std::ranges::subrange<std::ranges::iterator_t<Rng>>;
+    GroupIterator& operator++() {
+      cur = next_cur;
+      if (cur != last) {
+        next_cur = std::ranges::find_if_not(std::ranges::next(cur), last,
+            [&](auto&& elem) { return p(*cur, elem); });
+      }
+      return *this;
+    }
+    GroupIterator operator++(int) {
+      auto tmp(*this);
+      ++(*this);
+      return tmp;
+    }
+    value_type operator*() const {
+      return {cur, next_cur};
+    }
+    bool operator==(std::default_sentinel_t) const {
+      return cur == last;
+    }
+    bool operator==(const GroupIterator&) const = default;
+
+    Pred p;
+    std::ranges::iterator_t<Rng> cur{};
+    std::ranges::iterator_t<Rng> next_cur{};
+    std::ranges::sentinel_t<Rng> last{};
+  };  // struct GroupIterator
+
+  GroupIterator begin() {
+    auto beg = std::ranges::begin(r);
+    auto end = std::ranges::end(r);
+    return {p, beg, std::ranges::find_if_not(std::ranges::next(beg), end,
+        [&](auto&& elem) { return p(*beg, elem); }), end};
+  }
+  std::default_sentinel_t end() { return {}; }
+
+  Rng r;
+  Pred p;
+};  // struct GroupByView
+template <typename Pred>
+struct group_by_view_adapter : std::ranges::range_adaptor_closure<group_by_view_adapter<Pred>>{
+  Pred p;
+  template <std::ranges::viewable_range Rng>
+  constexpr auto operator()(Rng&& r) const {
+      return GroupByView{std::forward<Rng>(r), p};
+  }
+};  // struct group_by_view_adapter
+
+template <typename Pred>
+inline auto group_by(Pred p) {
+  return group_by_view_adapter{.p = std::move(p) };
+}
+
+auto by_month = group_by([](const Date& a, const Date& b) {
+  return a.month() == b.month();
+});
+auto by_week = group_by([](const Date& a, const Date& b) {
+  return a.week_day_less_than(b);
+});
+auto by_chunk = group_by([](const Date& a, const Date& b) {
+  return (a.month() - 1) / 4 == (b.month() - 1) / 4;
+});
+
+std::string month_title(const Date& d) {
+  return std::format("{:^22}", d.month_name());
+}
+constexpr std::size_t kOneDayFormatLength = 3;
+std::string format_day(const Date& d) {
+  return std::format("{:>{}}", d.day(), kOneDayFormatLength);
+}
+
+constexpr std::size_t kOneWeekFormatLength = (kOneDayFormatLength * 7) + 1;
+auto format_weeks = std::views::transform([](auto&& week) {
+  auto ws = week | std::views::transform(format_day)
+      | std::views::join | std::views::common;
+  std::string weeks(ws.begin(), ws.end());
+  //std::println("{}", weeks);
+  auto align_size = (*std::ranges::begin(week)).day_of_week() * kOneDayFormatLength;
+  //std::println("{}", align_size);
+  return std::format("{}{:<{}}", std::string(align_size, ' '), weeks, kOneWeekFormatLength - align_size);
+});
+
+constexpr std::size_t kMaxWeekCount = 6;
+auto layout_months = std::views::transform([](auto&& month) {
+  auto week_count = std::ranges::distance(month | by_week);
+  // cpp26 std::views::concat
+  return concat(
+    std::views::single(month_title((*std::ranges::begin(month)))),
+    std::views::single(std::string(" Su Mo Tu We Th Fr Sa ")),
+    month | by_week | format_weeks,
+    std::views::repeat(std::string(kOneWeekFormatLength, ' '), kMaxWeekCount - week_count)
+  );
+});
+
+void run_date() {
+  PRINT_CURRENT_FUNCTION_NAME;
+  using DatesInterval = std::ranges::iota_view<Date, Date>;
+  DatesInterval all_dates = dates_between(2022, 2023);
+  static_assert(std::ranges::range<DatesInterval>);
+  static_assert(std::input_or_output_iterator<decltype(all_dates.begin())>);
+
+  std::println("all dates");
+  print_range(all_dates, true);
+  std::println();
+
+  std::println("all dates by month");
+  print_range(all_dates | by_month, true);
+  std::println();
+
+  std::println("all dates by week");
+  print_range(all_dates | by_week, true);
+  std::println();
+
+  std::println("calendar 1");
+  print_range(all_dates | by_month | layout_months);
+  std::println();
+
+  std::println("calendar 2");
+  // clang 19 还没有实现 chunk
+  print_range(all_dates // range<Date>: 365 Date
+    | by_month // range<range<Date>: 12 * month
+    | layout_months  // range<range<std::string>>: 12 * 8 * 22
+    | chunk(4)  // range<range<range<std::string>>>: 3 * 4 * 8 * 22
+    | std::views::transform([](auto&& rng) { return rng | transpose; })  // 3 * 8 * 4 * 22 将月和行交换，这样就可以先将每个季度一行一行打印
+    | std::views::join // range<range<std::string>>: 24 * 4 * 22
+    | std::views::transform([](auto&& rng) { return rng | std::views::join; })  // range<range<char> 24 * 88
+  );
+  std::println();
+
+  std::println();
+}
+
 int main() {
   run_range_demo();
   run_foo();
@@ -505,6 +891,8 @@ int main() {
   run_split();
   run_reverse();
   run_elements();
+  run_iterator();
+  run_print_range();
+  run_date();
   return 0;
-
 }
