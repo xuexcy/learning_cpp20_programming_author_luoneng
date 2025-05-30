@@ -14,8 +14,12 @@ export compiler=clang++
 export default_execute_file=chapter_07
 
 # cmake 工作目录
-if [[ $compiler == "g++" ]];
-then
+if [[ $GITHUB_ACTION_CC != "" ]]; then
+    echo "In github action"
+    export CC=$GITHUB_ACTION_CC
+    export CXX=$GITHUB_ACTION_CXX
+    export build_dir=${this_script_dir}/build
+elif [[ $compiler == "g++" ]]; then
     export CC="gcc"
     export CXX="g++"
     export build_dir=${this_script_dir}/build_g++
