@@ -12,7 +12,6 @@
 */
 #pragma once
 
-#include <__ranges/range_adaptor.h>
 #include <cstddef>
 #include <iterator>
 #include <ranges>
