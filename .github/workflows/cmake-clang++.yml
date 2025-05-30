@@ -21,23 +21,24 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: install clang
       run: |
         wget https://apt.llvm.org/llvm.sh
         chmod +x llvm.sh
         sudo ./llvm.sh 20
         sudo apt install libc++-20-dev
-        
+
     - name: check compiler version
       run: |
         clang++-20 --version
-        
+
     - name: Build
       shell: bash
       # Build your program with the given configuration
       # run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-      run: which source && sh build.sh
+      run: |
+        which source && sh build.sh
 
     - name: Test
       working-directory: ${{github.workspace}}/build
