@@ -38,6 +38,7 @@ jobs:
       # Build your program with the given configuration
       # run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
       run: |
+        alias clang++=clang++-20
         ./build.sh
 
     - name: Test
