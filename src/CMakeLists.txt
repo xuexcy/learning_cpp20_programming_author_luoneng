@@ -19,5 +19,8 @@ target_link_libraries(${main_name} benchmark::benchmark )
 set(main_name chapter_02)
 add_executable(${main_name} ${main_name}/main.cc)
 
+set(main_name chapter_03)
+add_executable(${main_name} ${main_name}/main.cc)
+
 set(main_name chapter_07)
 add_executable(${main_name} ${main_name}/main.cc)
