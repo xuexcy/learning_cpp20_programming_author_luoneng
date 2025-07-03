@@ -830,7 +830,7 @@ template <typename, typename...> struct dump2;
 // dump2<T7> {};  // 可能由于前面的错误太多导致没有编译到这行就停止了
 
 // 使用 deprecated 来解决上面的问题
-// deprecated 属性表明被修饰的尸体已被弃用, 继续使用可以编译成功，但会引用编译告警
+// deprecated 属性表明被修饰的实体已被弃用, 继续使用可以编译成功，但会引用编译告警
 // 我们可以利用这个告警来实现调试功能
 template <typename, typename...>
 struct [[deprecated]] dump3{};
