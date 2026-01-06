@@ -2,6 +2,7 @@
 书名: C++20 高级编程
 作者: 罗能
 豆瓣链接: https://book.douban.com/subject/35948110/
+pdf: [C++20 高级编程](https://github.com/xuexcy/public_attachments/blob/main/books/C%2B%2B20%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B%20(%E7%BD%97%E8%83%BD)%20(Z-Library).pdf)
 ## Build And Run
 - `env_variable.sh`: 设置环境变量，如 cmake 工作目录、可执行文件存放的 bin 文件夹目录等
 - `build.sh`: 编译所有 src/*.cc
@@ -14,4 +15,5 @@
 2. 编译时多态
 3. 概念约束
 4. 元编程介绍
+5. 模板元编程
 7. Ranges 标准库

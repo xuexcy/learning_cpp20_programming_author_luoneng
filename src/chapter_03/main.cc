@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <concepts>
+#include <functional>
 #include <print>
 #include <type_traits>
 #include <vector>

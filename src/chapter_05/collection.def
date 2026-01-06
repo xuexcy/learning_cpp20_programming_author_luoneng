@@ -1,0 +1,20 @@
+#ifndef TYPE
+#error "TYPE must be defined before including collection.def"
+#endif
+
+#define CONCAT_IMPL(a, b) a##_##b
+#define CONCAT(a, b) CONCAT_IMPL(a, b)
+
+struct CONCAT(Collection, TYPE) {
+  TYPE* array;
+  std::size_t size, n;
+};
+
+#ifdef INSTANCE
+CONCAT(Collection, TYPE) CONCAT(make_Collection, TYPE)(std::size_t sz) {
+  return {nullptr, sz};
+}
+#endif
+
+#undef CONCAT_IMPL
+#undef CONCAT

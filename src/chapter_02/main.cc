@@ -408,7 +408,7 @@ template <typename T, typename = void>
 struct HasInit : std::false_type {
 };  // struct HasInit
 template <typename T>
-struct HasInit<T, std::void_t<decltype(declval<T>().Init())>> : std::true_type {
+struct HasInit<T, std::void_t<decltype(std::declval<T>().Init())>> : std::true_type {
 };  // struct HashInit
 
 // 2.3 奇异递归模板 CRTP curiously recurring template pattern

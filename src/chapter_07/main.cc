@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <concepts>
 #include <iostream>
 #include <iterator>
@@ -678,6 +679,7 @@ void run_print_range() {
 namespace chrono = std::chrono;
 struct Date {
   using difference_type = std::ptrdiff_t;
+  static const std::string kMonths[];
   Date() = default;
   Date(uint16_t year, uint16_t month, uint16_t day):
       days_{chrono::year(year) / chrono::month(month) / chrono::day(day)} {
@@ -698,13 +700,8 @@ struct Date {
   uint16_t month() const {  // [1, 12]
     return static_cast<unsigned>(chrono::year_month_day(days_).month());
   }
-  std::string month_name() const {
-    static const std::string months[] = {
-      "January", "February", "March", "April",
-      "May", "June", "July", "August",
-      "September", "October", "November", "December"
-    };
-    return months[month() - 1];
+  const std::string& month_name() const {
+    return kMonths[month() - 1];
   }
   uint16_t year() const {
     return static_cast<int>(chrono::year_month_day(days_).year());
@@ -722,6 +719,11 @@ struct Date {
 private:
   chrono::sys_days days_;
 };  // struct Date
+const std::string Date::kMonths[] = {
+  "January", "February", "March", "April",
+  "May", "June", "July", "August",
+  "September", "October", "November", "December"
+};
 static_assert(std::weakly_incrementable<Date>);
 
 template <>
