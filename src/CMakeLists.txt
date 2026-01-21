@@ -25,5 +25,8 @@ add_executable(${main_name} ${main_name}/main.cc)
 set(main_name chapter_05)
 add_executable(${main_name} ${main_name}/main.cc)
 
+set(main_name chapter_06)
+add_executable(${main_name} ${main_name}/main.cc)
+
 set(main_name chapter_07)
 add_executable(${main_name} ${main_name}/main.cc)
