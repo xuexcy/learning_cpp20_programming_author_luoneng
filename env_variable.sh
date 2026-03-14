@@ -11,7 +11,7 @@ echo ''
 
 # export compiler=clang++
 export compiler=g++
-export default_execute_file=chapter_06
+export default_execute_file=chapter_08
 
 # cmake 工作目录
 if [[ $GITHUB_ACTION_CC != "" ]]; then

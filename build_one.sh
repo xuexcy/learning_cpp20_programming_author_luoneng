@@ -19,13 +19,18 @@ source ./env_variable.sh
 
 # cmake ..
 
-main=$default_execute_file
+main=`basename $default_execute_file`
 if [ $# -gt 0 ]; then
     main=$1
 fi
 
 cd $build_dir
-make -j$(getconf _NPROCESSORS_ONLN) $main
+make -j$(getconf _NPROCESSORS_ONLN) $main # VERBOSE=1
+
+status=$?
+if [ $status != 0 ]; then
+    exit $status
+fi
 
 
 

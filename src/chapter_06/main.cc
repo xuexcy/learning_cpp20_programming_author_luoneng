@@ -457,7 +457,7 @@ using ConstructOnly2 = Counted2<{
 
 void run_nonetype_template_parameter() {
   PRINT_CURRENT_FUNCTION_NAME;
-  std::println("decltype(x)={}", cpp_utils::type_name<decltype(x)>());
+  std::println("decltype(x)={}", cpp_utils::type_name<decltype(x)>);
 }
 
 
@@ -674,7 +674,7 @@ SAME_TYPE(decltype(regions), (
 ));
 void run_constexpr_group() {
   PRINT_CURRENT_FUNCTION_NAME;
-  std::println("Regions type_name: {}", cpp_utils::type_name<decltype(regions)>());
+  std::println("Regions type_name: {}", cpp_utils::type_name<decltype(regions)>);
 }
 
 // 6.7 综合运用之编译时字符串操作

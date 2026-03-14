@@ -30,3 +30,6 @@ add_executable(${main_name} ${main_name}/main.cc)
 
 set(main_name chapter_07)
 add_executable(${main_name} ${main_name}/main.cc)
+
+set(main_name chapter_08)
+add_executable(${main_name} ${main_name}/main.cc)
