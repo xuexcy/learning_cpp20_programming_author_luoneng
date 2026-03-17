@@ -17,6 +17,13 @@ cd ${CUR_DIR}
 source env_variable.sh
 mkdir -p $build_dir
 cd $build_dir
-cmake ..
-make -j$(getconf _NPROCESSORS_ONLN)
+
+if [[ ${use_cpp_modules} -eq 1 ]]; then
+    cmake -G Ninja ..
+    ninja -j${cpu_core_num}
+else
+    cmake ..
+    make -j${cpu_core_num}
+fi
+
 

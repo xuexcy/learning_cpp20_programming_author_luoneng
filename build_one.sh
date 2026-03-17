@@ -25,8 +25,11 @@ if [ $# -gt 0 ]; then
 fi
 
 cd $build_dir
-make -j$(getconf _NPROCESSORS_ONLN) $main # VERBOSE=1
-
+if [[ ${use_cpp_modules} -eq 1 ]]; then
+    ninja -j${cpu_core_num} $main
+else
+    make -j${cpu_core_num} $main #VERBOSE=1
+fi
 status=$?
 if [ $status != 0 ]; then
     exit $status

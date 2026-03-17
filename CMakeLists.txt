@@ -1,10 +1,17 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 4.0.0)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+message ("compiler: ${CMAKE_CXX_COMPILER}")
+# set(CMAKE_BUILD_TYPE Debug)
+
+if ($ENV{use_cpp_modules})
+    set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
+    set(CMAKE_CXX_MODULE_STD ON)
+endif()
+
 project(cpp_cmake_project_template)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-message ("compiler: ${CMAKE_CXX_COMPILER}")
 # set(CMAKE_BUILD_TYPE Debug)
 
 set(THIRDPARTY_DIR ${CMAKE_SOURCE_DIR}/thirdparty)

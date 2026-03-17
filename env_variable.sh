@@ -8,11 +8,23 @@ fi
 
 echo "Project root dir:" $this_script_dir
 echo ''
+export cpu_core_num=`getconf _NPROCESSORS_ONLN`
 
-# export compiler=clang++
+
+
+
+#export compiler=clang++
 export compiler=g++
-export default_execute_file=chapter_08
+export use_cpp_modules=1 # 只在 ubuntu 上测试通过了, macos 上还不行
+export default_execute_file=chapter_09
 
+
+
+
+
+if [[ ${use_cpp_modules} -eq 1 ]]; then
+    echo "Build cpp modules with ninja"
+fi
 # cmake 工作目录
 if [[ $GITHUB_ACTION_CC != "" ]]; then
     echo "In github action"
