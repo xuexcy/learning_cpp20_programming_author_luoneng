@@ -102,6 +102,16 @@ FetchContent_MakeAvailable(boost)
 # #     include_directories(${THIRDPARTY_DIR}/boost/libs/${lib}/include)
 # # endforeach()
 #
+
+FetchContent_Declare(
+    jsoncpp
+    GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
+    GIT_TAG "1.9.6"
+    GIT_SHALLOW ON
+    SOURCE_DIR ${THIRDPARTY_DIR}/jsoncpp
+)
+FetchContent_MakeAvailable(jsoncpp)
+
 # #FetchContent_Declare(
 # #    eigen
 # #    URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz

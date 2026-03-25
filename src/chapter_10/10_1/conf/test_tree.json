@@ -1,0 +1,14 @@
+{
+  "name": "root",
+  "children": [
+    {"name": "left"},
+    {
+      "name": "mid",
+      "children": [
+        {"name": "mid_left"},
+        {"name": "mid_right"}
+      ]
+    },
+    {"name": "right"}
+  ]
+}
