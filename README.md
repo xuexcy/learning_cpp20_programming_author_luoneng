@@ -29,3 +29,4 @@ pdf: [C++20 高级编程](https://github.com/xuexcy/public_attachments/blob/main
 9. 模块
 10. 综合运用
 - 10.1 配置文件反序列化(原作者 config_loader 仓库[链接](https://github.com/netcan/config-loader/tree/master))
+- 10.2 AsyncIO协程库(原作者 asyncio 仓库[链接](https://github.com/netcan/asyncio))
